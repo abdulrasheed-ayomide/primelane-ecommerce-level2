@@ -24,6 +24,7 @@ function isUserLoggedIn() {
     showToast("Please sign in first", "warning");
 
     window.location.href = "../otherpages/login.html";
+    
 
     return false;
 

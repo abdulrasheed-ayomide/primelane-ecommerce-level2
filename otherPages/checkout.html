@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4f46e5',
+                        secondary: '#7c3aed',
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce-slow 3s infinite',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body
+   class="auth-loading bg-white dark:bg-gray-900 text-gray-800 dark:text-white transition duration-300 font-sans antialiased">
+
+  <!-- Header -->
+  <header class="sticky top-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg z-50">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16 md:h-20">
+
+        <!-- LOGO -->
+        <a href="../index.html" class="flex items-center shrink-0">
+          <img src="../multimedia/image.png" class="h-10 md:h-14 hover:scale-105 transition">
+        </a>
+
+        <h1 class=" font-semibold text-green-600">
+          Secure Checkout 🔒
+        </h1>
+
+        <!-- DARK MODE -->
+        <button id="darkToggle" class="bg-gray-200 dark:bg-gray-700 p-2 rounded-lg">
+          <span id="themeIcon">🌙</span>
+        </button>
+      </div>
+    </div>
+
+  </header>
+
+  <section class="max-w-6xl mx-auto px-4 py-10 grid md:grid-cols-2 gap-10">
+
+    <!-- LEFT: SHIPPING FORM -->
+    <div>
+      <h2 class="text-2xl font-bold mb-6">Shipping Details</h2>
+
+      <form id="checkoutForm" class="space-y-4">
+
+        <input type="text" id="fullName" placeholder="Full Name" class="w-full border p-3 rounded-lg" required>
+
+        <input type="email" id="email" placeholder="Email" class="w-full border p-3 rounded-lg" required>
+
+        <input type="text" id="address" placeholder="Address" class="w-full border p-3 rounded-lg" required>
+
+        <input type="text" id="city" placeholder="City" class="w-full border p-3 rounded-lg" required>
+
+        <button type="submit" class="bg-indigo-600 text-white px-6 py-3 rounded-lg w-full">
+          Place Order
+        </button>
+
+      </form>
+    </div>
+
+    <!-- RIGHT: ORDER SUMMARY -->
+    <div>
+      <h2 class="text-2xl font-bold mb-6">Order Summary</h2>
+
+      <div id="checkoutItems" class="space-y-4"></div>
+
+      <div class="mt-6 border-t pt-4">
+        <h3 class="text-xl font-bold">
+          Total: $<span id="checkoutTotal">0</span>
+        </h3>
+      </div>
+    </div>
+
+  </section>
+
+  <div id="toastContainer" class="fixed top-5 right-5 space-y-3 z-50"></div>
+
+  <script type="module" src="../js/checkout.js"></script>
+
+</body>
+
+</html>

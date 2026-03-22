@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrimeLane Shop</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4f46e5',
+                        secondary: '#7c3aed',
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce-slow 3s infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+</head>
+
+<body
+    class="auth-loading bg-white dark:bg-gray-900 text-gray-800 dark:text-white transition duration-300 font-sans antialiased">
+    <header class="sticky top-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg z-50">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 md:h-20">
+
+                <!-- LOGO -->
+                <a href="../index.html" class="flex items-center shrink-0">
+                    <img src="../multimedia/image.png" class="h-10 md:h-14 hover:scale-105 transition">
+                </a>
+
+                <!-- DESKTOP NAV -->
+                <nav class="hidden md:flex items-center space-x-8 flex-1 justify-center">
+                    <a href="../index.html" class="nav-link">Home</a>
+                    <a href="./shop.html" class="nav-link">Shop</a>
+                    <!-- <a href="#contact-section" class="nav-link">Contact Us</a> -->
+                </nav>
+
+                <!-- RIGHT SIDE -->
+                <div class="flex items-center space-x-3">
+
+                    <!-- DESKTOP AUTH -->
+                    <div class="hidden md:flex items-center space-x-3">
+
+                        <a href="./login.html" class="loginBtn nav-link">
+                            Login
+                        </a>
+
+                        <a href="./signUp.html" class="signupBtn bg-indigo-600 text-white px-4 py-2 rounded-lg">
+                            Sign Up
+                        </a>
+                    </div>
+
+                    <!-- USER PROFILE (DESKTOP) -->
+                    <div class="userProfile hidden relative">
+
+                        <button
+                            class="userMenuBtn flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-lg">
+                            <span
+                                class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold userInitial">
+                                U
+                            </span>
+
+                            <span class="hidden lg:inline text-sm userEmail"></span>
+                        </button>
+
+                        <!-- DROPDOWN -->
+                        <div
+                            class="userDropdown hidden absolute left-15 mt-5 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl py-2">
+
+                            <p class="px-4 text-sm text-gray-500">Signed in as</p>
+                            <p class="px-4 text-sm font-semibold userEmail"></p>
+
+                            <button class="logoutBtn w-full text-left px-4 py-2 text-red-500">
+                                Sign Out
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <!-- CART -->
+                    <a href="./cartpage.html" class="relative p-2">
+                        🛒
+                        <span id="cartIcon"
+                            class="cart-count absolute -top-1 -right-1 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                    </a>
+
+                    <!-- DARK MODE -->
+                    <button id="darkToggle" class="bg-gray-200 dark:bg-gray-700 p-2 rounded-lg">
+                        <span id="themeIcon">🌙</span>
+                    </button>
+
+                    <!-- HAMBURGER -->
+                    <button id="mobileMenuToggle" class="md:hidden bg-gray-200 dark:bg-gray-700 p-2 rounded-lg">
+                        ☰
+                    </button>
+
+                </div>
+            </div>
+
+            <!-- MOBILE MENU -->
+            <div id="mobileMenu" class="md:hidden hidden py-4 border-t">
+
+                <nav class="flex flex-col space-y-2">
+
+                    <a href="../index.html" class="mobile-nav-link">Home</a>
+                    <a href="./shop.html" class="mobile-nav-link">Shop</a>
+
+                    <!-- MOBILE AUTH -->
+                    <div class="mobileAuth">
+
+                        <a href="./login.html" class="loginBtn mobile-nav-link">
+                            Login
+                        </a>
+
+                        <a href="./signup.html"
+                            class="signupBtn bg-indigo-600 text-white px-4 py-2 rounded-lg text-center">
+                            Sign Up
+                        </a>
+
+                    </div>
+
+                    <!-- MOBILE USER -->
+                    <div class="userProfile hidden px-4 space-y-2">
+
+                        <div class="flex items-center space-x-3 bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
+                            <span
+                                class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold userInitial">U</span>
+                            <span class="userEmail text-sm"></span>
+                        </div>
+
+                        <button class="logoutBtn text-left text-red-500 px-4 py-2">
+                            Sign Out
+                        </button>
+
+                    </div>
+
+                </nav>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- HERO SECTION (Optional - you can keep or remove) -->
+    <section class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 py-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Our Products</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                Browse our collection of high-quality products curated just for you
+            </p>
+        </div>
+    </section>
+
+    <div class="w-[90%] m-auto mb-6 flex flex-col sm:flex-row gap-4">
+
+        <input id="searchInput" type="text" placeholder="Search products..."
+            class="border p-2 text-gray-200 rounded w-full bg-[#111827] sm:w-1/2">
+
+        <select id="categoryFilter" class="border p-2 text-gray-200 font-normal rounded w-full bg-[#111827] sm:w-1/4">
+            <option value="all">All Categories</option>
+            <option value="Gaming">Games</option>
+            <option value="Accessories">Accessories</option>
+            <option value="Electronics">Electronics</option>
+        </select>
+
+    </div>
+
+    <!-- PRODUCTS SECTION -->
+    <section class="max-w-7xl mx-auto px-4 py-12">
+
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        </div>
+
+    </section>
+
+    <!-- FOOTER (Same as index.html) -->
+    <footer class="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+                <!-- Company Info -->
+                <div class="space-y-4">
+                    <img src="../multimedia/image.png" alt="PrimeLane" class="h-12 w-auto rounded-full">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Your premier destination for online shopping. Quality products, unbeatable prices, and
+                        exceptional service.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="font-semibold text-lg mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">About
+                                Us</a></li>
+                        <li><a href="#contact-section"
+                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Contact</a>
+                        </li>
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">FAQ</a>
+                        </li>
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Blog</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Customer Service -->
+                <div>
+                    <h3 class="font-semibold text-lg mb-4">Customer Service</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Shipping
+                                Policy</a></li>
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Returns
+                                & Exchanges</a></li>
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Privacy
+                                Policy</a></li>
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Terms
+                                of Service</a></li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div>
+                    <h3 class="font-semibold text-lg mb-4">Stay Updated</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Subscribe to get special offers and
+                        updates.</p>
+                </div>
+            </div>
+
+            <!-- Bottom bar -->
+            <div class="border-t border-gray-200 dark:border-gray-700 mt-12 pt-8 text-center">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    © 2026 PrimeLane. All rights reserved. |
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Privacy</a> |
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Terms</a> |
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Sitemap</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="toastContainer" class="fixed top-5 right-5 space-y-3 z-50"></div>
+
+    <script type="module" src="../js/shop.js"></script>
+</body>
+
+</html>

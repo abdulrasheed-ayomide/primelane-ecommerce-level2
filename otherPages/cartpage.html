@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrimeLane Cartpage</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+     <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4f46e5',
+                        secondary: '#7c3aed',
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce-slow 3s infinite',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+
+<body
+    class="auth-loading bg-white dark:bg-gray-900 text-gray-800 dark:text-white transition duration-300 font-sans antialiased">
+
+    <!-- Header -->
+    <header class="sticky top-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg z-50">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 md:h-20">
+
+                <!-- LOGO -->
+                <a href="../index.html" class="flex items-center shrink-0">
+                    <img src="../multimedia/image.png" class="h-10 md:h-14 hover:scale-105 transition">
+                </a>
+
+                <!-- DESKTOP NAV -->
+                <nav class="hidden md:flex items-center space-x-8 flex-1 justify-center">
+                    <a href="../index.html" class="nav-link">Home</a>
+                    <a href="./shop.html" class="nav-link">Shop</a>
+                    <!-- <a href="#contact-section" class="nav-link">Contact Us</a> -->
+                </nav>
+
+                <!-- RIGHT SIDE -->
+                <div class="flex items-center space-x-3">
+
+                    <!-- DESKTOP AUTH -->
+                    <div class="hidden md:flex items-center space-x-3">
+
+                        <a href="./login.html" class="loginBtn nav-link">
+                            Login
+                        </a>
+
+                        <a href="./signUp.html" class="signupBtn bg-indigo-600 text-white px-4 py-2 rounded-lg">
+                            Sign Up
+                        </a>
+                    </div>
+
+                    <!-- USER PROFILE (DESKTOP) -->
+                    <div class="userProfile hidden relative">
+
+                        <button
+                            class="userMenuBtn flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-lg">
+                            <span
+                                class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold userInitial">
+                                U
+                            </span>
+
+                            <span class="hidden lg:inline text-sm userEmail"></span>
+                        </button>
+
+                        <!-- DROPDOWN -->
+                        <div
+                            class="userDropdown hidden absolute left-15 mt-5 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl py-2">
+
+                            <p class="px-4 text-sm text-gray-500">Signed in as</p>
+                            <p class="px-4 text-sm font-semibold userEmail"></p>
+
+                            <button class="logoutBtn w-full text-left px-4 py-2 text-red-500">
+                                Sign Out
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <!-- CART -->
+                    <a href="./cartPage.html" class="relative p-2">
+                        🛒
+                        <span id="cartIcon"
+                            class="cart-count absolute -top-1 -right-1 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                    </a>
+
+                    <!-- DARK MODE -->
+                    <button id="darkToggle" class="bg-gray-200 dark:bg-gray-700 p-2 rounded-lg">
+                        <span id="themeIcon">🌙</span>
+                    </button>
+
+                    <!-- HAMBURGER -->
+                    <button id="mobileMenuToggle" class="md:hidden bg-gray-200 dark:bg-gray-700 p-2 rounded-lg">
+                        ☰
+                    </button>
+
+                </div>
+            </div>
+
+            <!-- MOBILE MENU -->
+            <div id="mobileMenu" class="md:hidden hidden py-4 border-t">
+
+                <nav class="flex flex-col space-y-2">
+
+                    <a href="../index.html" class="mobile-nav-link">Home</a>
+                    <a href="./shop.html" class="mobile-nav-link">Shop</a>
+
+                    <!-- MOBILE AUTH -->
+                    <div class="mobileAuth">
+
+                        <a href="./login.html" class="loginBtn mobile-nav-link">
+                            Login
+                        </a>
+
+                        <a href="./signUp.html"
+                            class="signupBtn bg-indigo-600 text-white px-4 py-2 rounded-lg text-center">
+                            Sign Up
+                        </a>
+
+                    </div>
+
+                    <!-- MOBILE USER -->
+                    <div class="userProfile hidden px-4 space-y-2">
+
+                        <div class="flex items-center space-x-3 bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
+                            <span
+                                class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold userInitial">U</span>
+                            <span class="userEmail text-sm"></span>
+                        </div>
+
+                        <button class="logoutBtn text-left text-red-500 px-4 py-2">
+                            Sign Out
+                        </button>
+
+                    </div>
+
+                </nav>
+            </div>
+
+        </div>
+    </header>
+
+     <!-- CART HERO SECTION -->
+    <section class="bg-linear-to-r from-indigo-600 to-purple-600 text-white py-12 md:py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold mb-4">Your Shopping Cart</h1>
+            <p class="text-lg md:text-xl text-indigo-500 max-w-2xl mx-auto">
+                Review your items and proceed to checkout when you're ready.
+            </p>
+        </div>
+    </section>
+
+    <div class="max-w-6xl mx-auto p-6 bg-gray-100 dark:bg-gray-800 py-10 rounded-xl mt-10">
+
+        <h1 class="text-2xl font-bold mb-6">Your Cart</h1>
+
+        <div id="cartPageContainer" class="space-y-4 max-h-96 overflow-y-auto dark:bg-gray-700"></div>
+
+        <!-- Summary -->
+        <div id="cartSummary" class="mt-8 p-6 bg-white dark:bg-gray-800 rounded-xl shadow hidden">
+
+            <div class="flex justify-between mb-2">
+                <span>Subtotal</span>
+                <span>$<span id="subtotal"></span></span>
+            </div>
+
+            <div class="flex justify-between mb-2">
+                <span>Delivery</span>
+                <span>$<span id="delivery">10</span></span>
+            </div>
+
+            <div class="flex justify-between font-bold text-lg border-t pt-3 my-4">
+                <span>Total</span>
+                <span>$<span id="grandTotal"></span></span>
+            </div>
+
+            <button id="checkoutBtn" class="mt-6 bg-indigo-600 text-white py-3 px-2 rounded-lg">
+                Checkout
+            </button>
+
+        </div>
+
+    </div>
+
+    <div id="toastContainer" class="fixed top-5 right-5 space-y-3 z-50"></div>
+    <script type="module" src="../js/cartpage.js"></script>
+</body>
+
+</html>

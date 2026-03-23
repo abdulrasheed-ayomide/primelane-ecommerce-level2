@@ -104,7 +104,7 @@ export function renderProducts(products, container, options = {}) {
           </div>
 
           <p class="text-gray-400 text-sm mb-4">
-            ${description.slice(0, 100)}...
+            ${description.slice(0, 200)}
           </p>
 
           <div class="flex justify-between items-center mb-4">

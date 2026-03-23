@@ -29,15 +29,20 @@ form.addEventListener("submit", async (e) => {
     window.location.href = "../index.html";
 
   } catch (error) {
-
-    console.error(error);
-
-    // alert("Login failed: " + error.message);
-    Swal.fire({
-        title: "Login failed!",
-        text: error.message,
-        icon: "error"
-    });
+    //i want the conditon should be if there is no internet it will alert check your internet connection and if the email or password is incorrect it will alert incorrect email or password
+    if (error.code === "auth/network-request-failed") {
+        Swal.fire({
+            title: "Login failed!",
+            text: "Please check your internet connection and try again.",
+            icon: "error"
+        });
+    } else {
+        Swal.fire({
+            title: "Login failed!",
+            text: "incorrect email or password. Please try again.",
+            icon: "error"
+        });
+    }
 
   }
 

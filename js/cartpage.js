@@ -14,7 +14,17 @@ const subtotalEl = document.getElementById("subtotal");
 const grandTotalEl = document.getElementById("grandTotal");
 const checkoutBtn = document.getElementById("checkoutBtn");
 
+// if the user is not logged in and he or she click on checkout it should redirect to login
+
 checkoutBtn.addEventListener("click", () => {
+  if (!localStorage.getItem("user")) {
+    showToast("Please log in to proceed with checkout.", "info");
+    setTimeout(() => {
+      window.location.href = "../pages/login.html";
+    }, 1500);
+    return;
+  }
+
   showToast("Checking out...", "info");
 
       setTimeout(() => {

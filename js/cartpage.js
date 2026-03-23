@@ -18,7 +18,7 @@ checkoutBtn.addEventListener("click", () => {
   showToast("Checking out...", "info");
 
       setTimeout(() => {
-      window.location.href = "../otherpages/checkout.html";
+      window.location.href = "../pages/checkout.html";
     }, 1500);
 
 });

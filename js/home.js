@@ -32,3 +32,6 @@ function initBackToTop() {
 }
 
 initBackToTop();
+
+let currentYear = new Date().getFullYear();
+document.getElementById("year").textContent = currentYear;

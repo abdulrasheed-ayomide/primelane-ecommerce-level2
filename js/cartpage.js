@@ -1,18 +1,19 @@
 import "./header.js";
 import {
   onCartChange, increaseQuantity, decreaseQuantity, removeFromCart, setQuantity,
-  clearCart, cartSubtotal, syncCartWithProducts,
+  clearCart, cartSubtotal, syncCartWithProducts, getCart,
 } from "./cart.js";
 import { listProducts } from "./services/products.js";
-import { getStoreSettings, shippingFor } from "./services/settings.js";
+import { getStoreSettings, shippingFor, freeDeliveryStatus } from "./services/settings.js";
 import { confirmDialog, stateBlock } from "./ui.js";
 import { escapeHTML, formatPrice, safeUrl } from "./utils.js";
-import { DEFAULT_DELIVERY_FEE, MAX_QTY_PER_LINE } from "./config.js";
+import { MAX_QTY_PER_LINE } from "./config.js";
 
 const list = document.getElementById("cartPageContainer");
 const layout = document.getElementById("cartLayout");
 const notice = document.getElementById("cartNotice");
-let settings = { deliveryFee: DEFAULT_DELIVERY_FEE, freeDeliveryThreshold: 0 };
+// Real delivery settings from settings/store; null until loaded (never guess a fee).
+let settings = null;
 
 function itemHTML(item) {
   const max = Math.min(item.stock, MAX_QTY_PER_LINE);
@@ -45,19 +46,29 @@ function itemHTML(item) {
 
 function renderSummary(cart) {
   const subtotal = cartSubtotal(cart);
-  const delivery = shippingFor(subtotal, settings);
   document.getElementById("itemCount").textContent = cart.reduce((s, i) => s + i.quantity, 0);
   document.getElementById("subtotal").textContent = formatPrice(subtotal);
+  if (!settings) {
+    document.getElementById("delivery").textContent = "Calculating…";
+    document.getElementById("grandTotal").textContent = "—";
+    document.getElementById("freeDeliveryHint").classList.add("hidden");
+    return;
+  }
+  const delivery = shippingFor(subtotal, settings);
   document.getElementById("delivery").textContent = delivery === 0 ? "Free" : formatPrice(delivery);
   document.getElementById("grandTotal").textContent = formatPrice(subtotal + delivery);
 
+  // Free-delivery message (only when an admin has set a "free delivery from" amount).
   const hint = document.getElementById("freeDeliveryHint");
-  const remaining = settings.freeDeliveryThreshold - subtotal;
-  if (settings.freeDeliveryThreshold > 0 && remaining > 0) {
-    hint.textContent = `Add ${formatPrice(remaining)} more to get free delivery.`;
-    hint.classList.remove("hidden");
-  } else {
-    hint.classList.add("hidden");
+  const free = freeDeliveryStatus(subtotal, settings);
+  hint.classList.toggle("hidden", !free.enabled);
+  if (free.enabled) {
+    hint.textContent = free.qualifies
+      ? "🎉 You qualify for free delivery!"
+      : `Add ${formatPrice(free.remaining)} more to get free delivery (free on orders of ${formatPrice(free.threshold)} or more).`;
+    hint.className = `mt-3 rounded-lg p-3 text-xs ${free.qualifies
+      ? "bg-green-50 font-semibold text-green-800 dark:bg-green-950/40 dark:text-green-200"
+      : "bg-gray-50 text-gray-700 dark:bg-gray-800/60 dark:text-gray-300"}`;
   }
 }
 
@@ -97,10 +108,19 @@ document.getElementById("clearCartBtn").addEventListener("click", async () => {
 onCartChange(render);
 
 // Refresh prices/stock from the database so the cart never shows stale data.
+getStoreSettings()
+  .then((storeSettings) => {
+    settings = storeSettings;
+    if (getCart().length) renderSummary(getCart());
+  })
+  .catch((error) => {
+    console.error("Could not load delivery settings", error);
+    document.getElementById("delivery").textContent = "Shown at checkout";
+  });
+
 (async function refresh() {
   try {
-    const [products, storeSettings] = await Promise.all([listProducts({ fresh: true }), getStoreSettings()]);
-    settings = storeSettings;
+    const products = await listProducts({ fresh: true });
     const notes = syncCartWithProducts(new Map(products.map((p) => [p.id, p])));
     if (notes.length) {
       notice.innerHTML = `<p class="font-semibold">Your cart was updated</p><ul class="mt-1 list-disc pl-5">${notes.map((n) => `<li>${escapeHTML(n)}</li>`).join("")}</ul>`;

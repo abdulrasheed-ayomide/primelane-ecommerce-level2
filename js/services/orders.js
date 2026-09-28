@@ -21,13 +21,31 @@ class CheckoutError extends Error {
 }
 
 /**
+ * The delivery fee or total the customer saw is no longer what they would be charged
+ * (an admin changed the delivery settings or a price while they were on checkout).
+ * Nothing is written; the checkout page refreshes its summary and asks them to confirm again.
+ */
+export class OrderTotalsChangedError extends CheckoutError {
+  constructor({ shippingFee, total }) {
+    super("Your order total has changed. Please review the updated summary and place your order again.");
+    this.code = "order-totals-changed";
+    this.shippingFee = shippingFee;
+    this.total = total;
+  }
+}
+
+/**
  * Creates an order in ONE transaction:
  *  - reads each product to get the real, current price and stock
  *  - saves the order with those prices (so later price changes don't affect it)
  *  - reduces stock for each product
  * firestore.rules re-checks prices, totals, delivery fee and stock changes on the server.
+ *
+ * `expected` = { shippingFee, total } the customer was shown. If the freshly calculated
+ * values differ, OrderTotalsChangedError is thrown BEFORE anything is written, so a
+ * customer is never charged an amount they didn't see.
  */
-export async function placeOrder({ uid, customer, shipping, cartItems }) {
+export async function placeOrder({ uid, customer, shipping, cartItems, expected }) {
   if (!cartItems.length) throw new CheckoutError("Your cart is empty.");
 
   const orderRef = doc(collection(db, "orders"));
@@ -75,6 +93,11 @@ export async function placeOrder({ uid, customer, shipping, cartItems }) {
 
     const subtotal = roundMoney(items.reduce((sum, item) => sum + item.lineTotal, 0));
     const shippingFee = shippingFor(subtotal, settings);
+    const total = roundMoney(subtotal + shippingFee);
+
+    if (expected && (roundMoney(expected.shippingFee) !== shippingFee || roundMoney(expected.total) !== total)) {
+      throw new OrderTotalsChangedError({ shippingFee, total });
+    }
 
     // 3. write the order
     tx.set(orderRef, {
@@ -87,7 +110,7 @@ export async function placeOrder({ uid, customer, shipping, cartItems }) {
       itemCount: items.reduce((sum, i) => sum + i.quantity, 0),
       subtotal,
       shippingFee,
-      total: roundMoney(subtotal + shippingFee),
+      total,
       currency: CURRENCY,
       status: "placed",
       statusHistory: [{ status: "placed", at: Timestamp.now(), by: "customer" }],

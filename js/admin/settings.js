@@ -24,6 +24,7 @@ export async function render(container, ctx) {
             <p id="threshold-hint" class="mt-1 text-xs text-gray-500">Orders at or above this subtotal ship free. Use 0 to always charge delivery.</p>
           </div>
         </div>
+        <p class="text-xs text-gray-500">Customers see the delivery fee in the cart and at checkout. When "Free delivery from" is above 0, a free-delivery message also appears on the home page, product pages, cart and checkout. Changes apply to new orders only; existing orders keep the fee they were charged.</p>
         <div class="flex justify-end"><button type="submit" class="btn-primary">Save settings</button></div>
       </form>
 
@@ -32,7 +33,9 @@ export async function render(container, ctx) {
         <p class="mt-2 text-gray-600 dark:text-gray-400">
           ${ENABLE_IMAGE_UPLOADS
             ? "Image uploads through Firebase Storage are <strong>on</strong>."
-            : "Products use image URLs. Uploading through Firebase Storage is built in but turned off, because Storage needs the Blaze plan. To enable it, set <code>ENABLE_IMAGE_UPLOADS = true</code> in <code>js/config.js</code> and deploy <code>storage.rules</code>."}
+            : `Products use image URLs. Uploading through Firebase Storage is built in but turned off, because Storage needs the Blaze (pay-as-you-go) plan.
+               To turn it on later: upgrade to Blaze and create a Storage bucket in the Firebase console, publish the contents of <code>storage.rules</code> in
+               <strong>Firebase Console → Storage → Rules</strong>, then set <code>ENABLE_IMAGE_UPLOADS = true</code> in <code>js/config.js</code>.`}
         </p>
       </section>
     </div>`;

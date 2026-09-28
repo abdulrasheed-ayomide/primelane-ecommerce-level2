@@ -5,11 +5,24 @@ import { renderProducts, stockLabel } from "./renderProducts.js";
 import { stateBlock } from "./ui.js";
 import { escapeHTML, formatPrice, safeUrl, discountPercent, starsHTML, getParam, friendlyError } from "./utils.js";
 import { MAX_QTY_PER_LINE } from "./config.js";
+import { getStoreSettings, freeDeliveryStatus } from "./services/settings.js";
 
 const detail = document.getElementById("productDetail");
 const breadcrumb = document.getElementById("breadcrumb");
 
-function renderProduct(product) {
+// Delivery settings (only used for the free-delivery note). Loaded in parallel with the product.
+const settingsPromise = getStoreSettings({ cached: true }).catch(() => null);
+
+function freeDeliveryNoteHTML(product, settings) {
+  const free = freeDeliveryStatus(product.price, settings);
+  if (!free.enabled || product.stock <= 0) return "";
+  const text = free.qualifies
+    ? "This item qualifies for free delivery."
+    : `Spend ${formatPrice(free.threshold)} or more to qualify for free delivery.`;
+  return `<p class="mt-2 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400" data-free-delivery><span aria-hidden="true">🚚</span>${escapeHTML(text)}</p>`;
+}
+
+function renderProduct(product, settings = null) {
   const off = discountPercent(product.price, product.originalPrice);
   const soldOut = product.stock <= 0;
   const inCart = getCart().find((i) => i.id === product.id)?.quantity ?? 0;
@@ -49,6 +62,7 @@ function renderProduct(product) {
                  <span class="text-sm font-semibold text-red-600 dark:text-red-400">You save ${formatPrice(product.originalPrice - product.price)}</span>` : ""}
       </div>
       <div class="mt-2">${stockLabel(product.stock)}</div>
+      ${settings ? freeDeliveryNoteHTML(product, settings) : ""}
 
       <div class="mt-6 border-y border-gray-200 py-6 dark:border-gray-800">
         ${soldOut
@@ -104,7 +118,7 @@ function renderProduct(product) {
   );
   qtyInput?.addEventListener("change", clampQty);
   document.getElementById("addToCartBtn")?.addEventListener("click", () => {
-    if (addToCart(product, clampQty())) renderProduct(product); // refresh "already in cart" limits
+    if (addToCart(product, clampQty())) renderProduct(product, settings); // refresh "already in cart" limits
   });
 }
 
@@ -135,7 +149,7 @@ async function load() {
       detail.innerHTML = stateBlock({ icon: "search", title: "Product not found", message: "It may have been removed from the store.", action: { label: "Browse products", href: "/pages/shop.html" } });
       return;
     }
-    renderProduct(product);
+    renderProduct(product, await settingsPromise);
     loadRelated(product);
   } catch (error) {
     console.error(error);

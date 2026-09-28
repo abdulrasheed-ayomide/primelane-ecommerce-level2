@@ -1,6 +1,7 @@
 import "./header.js";
 import { listProducts, getCategories } from "./services/products.js";
 import { sendMessage } from "./services/messages.js";
+import { getStoreSettings, freeDeliveryStatus } from "./services/settings.js";
 import { renderProducts, skeletonCardsHTML, productUrl } from "./renderProducts.js";
 import { escapeHTML, safeUrl, discountPercent, formatPrice, friendlyError } from "./utils.js";
 import { stateBlock, validateForm, validators, setButtonLoading } from "./ui.js";
@@ -141,5 +142,17 @@ window.addEventListener("scroll", () => {
   });
 }, { passive: true });
 backToTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+
+/* ---------- Free-delivery offer (only when configured in Admin → Settings) ---------- */
+
+getStoreSettings({ cached: true })
+  .then((settings) => {
+    const free = freeDeliveryStatus(0, settings);
+    if (!free.enabled) return;
+    const promo = document.getElementById("freeDeliveryPromo");
+    promo.querySelector("[data-text]").textContent = `Free delivery on orders of ${formatPrice(free.threshold)} or more`;
+    promo.hidden = false;
+  })
+  .catch(() => {}); // the offer is optional; never block the page
 
 loadHome();

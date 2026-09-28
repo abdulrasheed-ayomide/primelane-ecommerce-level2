@@ -138,6 +138,11 @@
         () => setDoc(doc(db, "products", PROBE), { title: "Probe", category: "Test", price: 1, stock: 0 }),
         { undo: () => deleteDoc(doc(db, "products", PROBE)) });
       await check("Customer: read contact messages", "denied", () => getDocs(query(collection(db, "messages"), limit(1))));
+      const storeSettings = await getDoc(doc(db, "settings", "store"));
+      if (storeSettings.exists()) {
+        await check("Customer: change delivery settings", "denied", () => setDoc(doc(db, "settings", "store"), storeSettings.data()),
+          { note: "writes the current values, so nothing changes even if allowed" });
+      }
       // Another customer's order: find one via our own list is impossible by design, so try a random id.
       await check("Customer: read a random order id", "denied", () => getDoc(doc(db, "orders", "someone-elses-order")),
         { note: "a missing order is still denied, because the rules can't prove it's yours" });

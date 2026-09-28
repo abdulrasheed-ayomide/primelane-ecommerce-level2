@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order details | PrimeLane</title>
+  <link rel="icon" href="/multimedia/imgi_17_best-ecommerce-website-design-cover.jpg">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}</script>
+</head>
+
+<body data-page="account" data-requires-auth class="flex min-h-screen flex-col">
+  <div id="site-header"></div>
+
+  <main id="main" class="flex-1">
+    <div class="container-page py-8 md:py-12">
+      <a href="/pages/account.html#orders" class="text-sm font-semibold text-indigo-600 hover:underline dark:text-indigo-400">← All orders</a>
+      <div id="orderRoot" class="mt-4" aria-busy="true">
+        <div class="space-y-4" aria-hidden="true">
+          <div class="skeleton h-10 w-64"></div>
+          <div class="skeleton h-40 w-full rounded-xl"></div>
+          <div class="skeleton h-64 w-full rounded-xl"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+  <script type="module" src="/js/order.js"></script>
+</body>
+
+</html>

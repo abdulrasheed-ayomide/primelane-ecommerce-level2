@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product | PrimeLane</title>
+  <meta name="description" content="Product details, price and availability at PrimeLane.">
+  <link rel="icon" href="/multimedia/imgi_17_best-ecommerce-website-design-cover.jpg">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}</script>
+</head>
+
+<body data-page="shop" class="flex min-h-screen flex-col">
+  <div id="site-header"></div>
+
+  <main id="main" class="flex-1">
+    <div class="container-page py-6 md:py-10">
+      <nav id="breadcrumb" aria-label="Breadcrumb" class="mb-6 truncate text-sm text-gray-500 dark:text-gray-400">
+        <a href="/index.html" class="hover:text-indigo-600">Home</a> / <a href="/pages/shop.html" class="hover:text-indigo-600">Shop</a>
+      </nav>
+
+      <div id="productDetail" aria-busy="true">
+        <!-- loading skeleton -->
+        <div class="grid gap-8 md:grid-cols-2 lg:gap-12" aria-hidden="true">
+          <div class="skeleton aspect-square rounded-2xl"></div>
+          <div class="space-y-4">
+            <div class="skeleton h-4 w-24"></div>
+            <div class="skeleton h-8 w-3/4"></div>
+            <div class="skeleton h-5 w-40"></div>
+            <div class="skeleton h-10 w-48"></div>
+            <div class="skeleton h-24 w-full"></div>
+            <div class="skeleton h-12 w-full"></div>
+          </div>
+        </div>
+      </div>
+
+      <section id="relatedSection" class="mt-16 hidden" aria-labelledby="related-heading">
+        <h2 id="related-heading" class="mb-6 text-2xl font-bold">You may also like</h2>
+        <div id="relatedProducts" class="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 md:gap-6 lg:grid-cols-4"></div>
+      </section>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+  <script type="module" src="/js/productPage.js"></script>
+</body>
+
+</html>

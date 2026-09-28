@@ -1,113 +1,112 @@
 import "./header.js";
 import {
-  onCartChange,
-  increaseQuantity,
-  decreaseQuantity,
-  removeFromCart
+  onCartChange, increaseQuantity, decreaseQuantity, removeFromCart, setQuantity,
+  clearCart, cartSubtotal, syncCartWithProducts,
 } from "./cart.js";
-import { showToast } from "./toast.js";
+import { listProducts } from "./services/products.js";
+import { getStoreSettings, shippingFor } from "./services/settings.js";
+import { confirmDialog, stateBlock } from "./ui.js";
+import { escapeHTML, formatPrice, safeUrl } from "./utils.js";
+import { DEFAULT_DELIVERY_FEE, MAX_QTY_PER_LINE } from "./config.js";
 
+const list = document.getElementById("cartPageContainer");
+const layout = document.getElementById("cartLayout");
+const notice = document.getElementById("cartNotice");
+let settings = { deliveryFee: DEFAULT_DELIVERY_FEE, freeDeliveryThreshold: 0 };
 
-const container = document.getElementById("cartPageContainer");
-const summary = document.getElementById("cartSummary");
-const subtotalEl = document.getElementById("subtotal");
-const grandTotalEl = document.getElementById("grandTotal");
-const checkoutBtn = document.getElementById("checkoutBtn");
-
-
-checkoutBtn.addEventListener("click", () => {
-  showToast("Checking out...", "info");
-
-      setTimeout(() => {
-      window.location.href = "../pages/checkout.html";
-    }, 1500);
-
-});
-
-
-
-
-onCartChange((cart) => {
-
-  container.innerHTML = "";
-
-  if (cart.length === 0) {
-    summary.classList.add("hidden");
-
-    container.innerHTML = `
-      <div class="text-center py-20">
-        <h2 class="text-xl font-semibold mb-3">
-          Your cart is empty 🛒
-        </h2>
-        <a href="shop.html"
-           class="bg-indigo-600 text-white px-6 py-3 rounded-lg">
-          Continue Shopping
-        </a>
+function itemHTML(item) {
+  const max = Math.min(item.stock, MAX_QTY_PER_LINE);
+  const url = `/pages/product.html?id=${encodeURIComponent(item.id)}`;
+  return `
+  <li class="flex gap-4 p-4 sm:p-5" data-id="${escapeHTML(item.id)}">
+    <a href="${url}" class="shrink-0" tabindex="-1" aria-hidden="true">
+      <img src="${escapeHTML(safeUrl(item.image))}" alt="" loading="lazy" class="h-20 w-20 rounded-lg bg-gray-100 object-cover sm:h-28 sm:w-28 dark:bg-gray-800"
+        onerror="this.onerror=null;this.src='/multimedia/placeholder.svg'">
+    </a>
+    <div class="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div class="min-w-0">
+        <h3 class="line-clamp-2 font-semibold"><a href="${url}" class="hover:text-indigo-600 dark:hover:text-indigo-400">${escapeHTML(item.title)}</a></h3>
+        <p class="mt-1 text-sm text-gray-500">${formatPrice(item.price)} each</p>
+        ${item.stock <= 5 ? `<p class="mt-1 text-xs font-medium text-amber-700 dark:text-amber-400">Only ${item.stock} left</p>` : ""}
       </div>
-    `;
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 sm:flex-col sm:flex-nowrap sm:items-end">
+        <div class="flex items-center rounded-lg border border-gray-300 dark:border-gray-700" role="group" aria-label="Quantity for ${escapeHTML(item.title)}">
+          <button type="button" data-action="decrease" class="icon-btn h-9 w-9" aria-label="Decrease quantity" ${item.quantity <= 1 ? "disabled" : ""}>−</button>
+          <input type="number" data-action="set" value="${item.quantity}" min="1" max="${max}" inputmode="numeric" aria-label="Quantity"
+            class="h-9 w-12 border-0 bg-transparent text-center text-sm font-semibold focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
+          <button type="button" data-action="increase" class="icon-btn h-9 w-9" aria-label="Increase quantity" ${item.quantity >= max ? "disabled" : ""}>+</button>
+        </div>
+        <p class="font-semibold tabular-nums">${formatPrice(item.price * item.quantity)}</p>
+        <button type="button" data-action="remove" class="w-full py-1 text-left text-sm font-medium text-red-600 hover:underline sm:w-auto sm:text-right dark:text-red-400">Remove</button>
+      </div>
+    </div>
+  </li>`;
+}
+
+function renderSummary(cart) {
+  const subtotal = cartSubtotal(cart);
+  const delivery = shippingFor(subtotal, settings);
+  document.getElementById("itemCount").textContent = cart.reduce((s, i) => s + i.quantity, 0);
+  document.getElementById("subtotal").textContent = formatPrice(subtotal);
+  document.getElementById("delivery").textContent = delivery === 0 ? "Free" : formatPrice(delivery);
+  document.getElementById("grandTotal").textContent = formatPrice(subtotal + delivery);
+
+  const hint = document.getElementById("freeDeliveryHint");
+  const remaining = settings.freeDeliveryThreshold - subtotal;
+  if (settings.freeDeliveryThreshold > 0 && remaining > 0) {
+    hint.textContent = `Add ${formatPrice(remaining)} more to get free delivery.`;
+    hint.classList.remove("hidden");
+  } else {
+    hint.classList.add("hidden");
+  }
+}
+
+function render(cart) {
+  if (!cart.length) {
+    layout.innerHTML = `<div class="card lg:col-span-2">${stateBlock({
+      title: "Your cart is empty",
+      message: "Looks like you haven't added anything yet.",
+      action: { label: "Start shopping", href: "/pages/shop.html" },
+    })}</div>`;
     return;
   }
+  list.innerHTML = cart.map(itemHTML).join("");
+  renderSummary(cart);
+}
 
-  summary.classList.remove("hidden");
-
-  let subtotal = 0;
-
-  cart.forEach(item => {
-
-    subtotal += item.price * item.quantity;
-
-    const div = document.createElement("div");
-    div.className =
-      "bg-white dark:bg-gray-800 p-5 rounded-xl shadow flex flex-col sm:flex-row gap-6";
-
-    div.innerHTML = `
-      <img src="${item.image}"
-           class="w-full sm:w-40 h-40 object-cover rounded-lg">
-
-      <div class="flex-1">
-
-        <h3 class="text-lg font-semibold mb-2">
-          ${item.title}
-        </h3>
-
-        <p class="text-indigo-600 font-bold mb-3">
-          $${item.price}
-        </p>
-
-        <div class="flex items-center gap-3 mb-3">
-          <button  class="border border-gray-400 dark:border-gray-600 px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition decrease">-</button>
-          <span>${item.quantity}</span>
-          <button class="border border-gray-400 dark:border-gray-600 px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition increase">+</button>
-        </div>
-
-        <button class="text-red-500 remove">
-          Remove
-        </button>
-
-      </div>
-    `;
-
-    div.querySelector(".increase")
-      .addEventListener("click", () =>
-        increaseQuantity(item.id)
-      );
-
-    div.querySelector(".decrease")
-      .addEventListener("click", () =>
-        decreaseQuantity(item.id)
-      );
-
-    div.querySelector(".remove")
-      .addEventListener("click", () =>
-        removeFromCart(item.id)
-      );
-
-    container.appendChild(div);
-  });
-
-  const delivery = 10;
-  const grandTotal = subtotal + delivery;
-
-  subtotalEl.textContent = subtotal.toFixed(2);
-  grandTotalEl.textContent = grandTotal.toFixed(2);
+list.addEventListener("click", (e) => {
+  const button = e.target.closest("button[data-action]");
+  const id = e.target.closest("[data-id]")?.dataset.id;
+  if (!button || !id) return;
+  if (button.dataset.action === "increase") increaseQuantity(id);
+  if (button.dataset.action === "decrease") decreaseQuantity(id);
+  if (button.dataset.action === "remove") removeFromCart(id);
 });
+list.addEventListener("change", (e) => {
+  if (e.target.dataset.action !== "set") return;
+  const id = e.target.closest("[data-id]").dataset.id;
+  const applied = setQuantity(id, e.target.value);
+  e.target.value = applied;
+});
+
+document.getElementById("clearCartBtn").addEventListener("click", async () => {
+  const ok = await confirmDialog({ title: "Remove all items?", message: "This empties your cart.", confirmText: "Remove all", danger: true });
+  if (ok) clearCart();
+});
+
+onCartChange(render);
+
+// Refresh prices/stock from the database so the cart never shows stale data.
+(async function refresh() {
+  try {
+    const [products, storeSettings] = await Promise.all([listProducts({ fresh: true }), getStoreSettings()]);
+    settings = storeSettings;
+    const notes = syncCartWithProducts(new Map(products.map((p) => [p.id, p])));
+    if (notes.length) {
+      notice.innerHTML = `<p class="font-semibold">Your cart was updated</p><ul class="mt-1 list-disc pl-5">${notes.map((n) => `<li>${escapeHTML(n)}</li>`).join("")}</ul>`;
+      notice.classList.remove("hidden");
+    }
+  } catch (error) {
+    console.error("Could not refresh cart", error);
+  }
+})();

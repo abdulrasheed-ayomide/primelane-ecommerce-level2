@@ -1,18 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Admin Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | PrimeLane</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/multimedia/imgi_17_best-ecommerce-website-design-cover.jpg">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}</script>
 </head>
 
-<body>
+<body class="min-h-screen bg-gray-50 dark:bg-gray-950">
+  <a href="#adminMain" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2">Skip to content</a>
 
-    <h1>Admin Orders Dashboard</h1>
+  <!-- Guard: shown until the admin role is confirmed -->
+  <div id="adminGate" class="flex min-h-screen items-center justify-center p-4">
+    <div class="flex items-center gap-3 text-gray-500"><span class="spinner h-5 w-5"></span> Checking access…</div>
+  </div>
 
-    <div id="ordersContainer"></div>
+  <div id="adminApp" class="hidden">
+    <!-- Mobile overlay for the sidebar -->
+    <div id="sidebarOverlay" class="fixed inset-0 z-40 hidden bg-gray-900/50 lg:hidden" aria-hidden="true"></div>
 
-    <script type="module" src="../js/admin.js"></script>
+    <aside id="adminSidebar" aria-label="Admin navigation"
+      class="fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col border-r border-gray-200 bg-white transition-transform duration-200 lg:translate-x-0 dark:border-gray-800 dark:bg-gray-900">
+      <div class="flex h-16 items-center justify-between border-b border-gray-200 px-4 dark:border-gray-800">
+        <a href="/index.html" class="flex items-center gap-2" aria-label="Back to store">
+          <img src="/multimedia/image.png" alt="PrimeLane" class="h-9 w-auto">
+          <span class="badge bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">Admin</span>
+        </a>
+        <button type="button" id="closeSidebar" class="icon-btn lg:hidden" aria-label="Close menu">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <nav id="adminNav" class="flex-1 space-y-1 overflow-y-auto p-3"></nav>
+      <div class="border-t border-gray-200 p-3 dark:border-gray-800">
+        <a href="/index.html" class="btn-ghost w-full justify-start">← Back to store</a>
+      </div>
+    </aside>
 
+    <div class="lg:pl-64">
+      <header class="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-gray-200 bg-white/95 px-4 backdrop-blur sm:px-6 dark:border-gray-800 dark:bg-gray-900/95">
+        <button type="button" id="openSidebar" class="icon-btn -ml-2 lg:hidden" aria-label="Open menu" aria-controls="adminSidebar" aria-expanded="false">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+        </button>
+        <h1 id="adminTitle" class="truncate text-lg font-semibold">Dashboard</h1>
+        <div class="ml-auto flex items-center gap-1">
+          <button type="button" id="refreshData" class="icon-btn" aria-label="Refresh data" title="Refresh data">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+          </button>
+          <button type="button" class="icon-btn" data-theme-toggle aria-label="Toggle dark mode"></button>
+          <span id="adminUser" class="hidden max-w-48 truncate pl-2 text-sm text-gray-500 sm:inline"></span>
+        </div>
+      </header>
+
+      <main id="adminMain" class="p-4 sm:p-6 lg:p-8"></main>
+    </div>
+  </div>
+
+  <script type="module" src="/js/admin.js"></script>
 </body>
 
 </html>

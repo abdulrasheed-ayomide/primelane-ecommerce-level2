@@ -2,260 +2,99 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PrimeLane Shop</title>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#4f46e5',
-                        secondary: '#7c3aed',
-                    },
-                    animation: {
-                        'bounce-slow': 'bounce-slow 3s infinite',
-                    }
-                }
-            }
-        }
-    </script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop | PrimeLane</title>
+  <meta name="description" content="Browse PrimeLane products by category, price and rating.">
+  <link rel="icon" href="/multimedia/imgi_17_best-ecommerce-website-design-cover.jpg">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}</script>
 </head>
 
-<body
-    class="auth-loading bg-white dark:bg-gray-900 text-gray-800 dark:text-white transition duration-300 font-sans antialiased">
-    <header class="sticky top-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg z-50">
+<body data-page="shop" class="flex min-h-screen flex-col">
+  <div id="site-header"></div>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16 md:h-20">
-
-                <!-- LOGO -->
-                <a href="../index.html" class="flex items-center shrink-0">
-                    <img src="../multimedia/image.png" class="h-10 md:h-14 hover:scale-105 transition">
-                </a>
-
-                <!-- DESKTOP NAV -->
-                <nav class="hidden md:flex items-center space-x-8 flex-1 justify-center">
-                    <a href="../index.html" class="nav-link">Home</a>
-                    <a href="./shop.html" class="nav-link">Shop</a>
-                    <!-- <a href="#contact-section" class="nav-link">Contact Us</a> -->
-                </nav>
-
-                <!-- RIGHT SIDE -->
-                <div class="flex items-center space-x-3">
-
-                    <!-- DESKTOP AUTH -->
-                    <div class="hidden md:flex items-center space-x-3">
-
-                        <a href="./login.html" class="loginBtn nav-link">
-                            Login
-                        </a>
-
-                        <a href="./signUp.html" class="signupBtn bg-indigo-600 text-white px-4 py-2 rounded-lg">
-                            Sign Up
-                        </a>
-                    </div>
-
-                    <!-- USER PROFILE (DESKTOP) -->
-                    <div class="userProfile hidden relative">
-
-                        <button
-                            class="userMenuBtn flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-lg">
-                            <span
-                                class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold userInitial">
-                                U
-                            </span>
-
-                            <span class="hidden lg:inline text-sm userEmail"></span>
-                        </button>
-
-                        <!-- DROPDOWN -->
-                        <div
-                            class="userDropdown hidden absolute left-15 mt-5 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl py-2">
-
-                            <p class="px-4 text-sm text-gray-500">Signed in as</p>
-                            <p class="px-4 text-sm font-semibold userEmail"></p>
-
-                            <button class="logoutBtn w-full text-left px-4 py-2 text-red-500">
-                                Sign Out
-                            </button>
-
-                        </div>
-                    </div>
-
-                    <!-- CART -->
-                    <a href="./cartpage.html" class="relative p-2">
-                        🛒
-                        <span id="cartIcon"
-                            class="cart-count absolute -top-1 -right-1 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
-                    </a>
-
-                    <!-- DARK MODE -->
-                    <button id="darkToggle" class="bg-gray-200 dark:bg-gray-700 p-2 rounded-lg">
-                        <span id="themeIcon">🌙</span>
-                    </button>
-
-                    <!-- HAMBURGER -->
-                    <button id="mobileMenuToggle" class="md:hidden bg-gray-200 dark:bg-gray-700 p-2 rounded-lg">
-                        ☰
-                    </button>
-
-                </div>
-            </div>
-
-            <!-- MOBILE MENU -->
-            <div id="mobileMenu" class="md:hidden hidden py-4 border-t">
-
-                <nav class="flex flex-col space-y-2">
-
-                    <a href="../index.html" class="mobile-nav-link">Home</a>
-                    <a href="./shop.html" class="mobile-nav-link">Shop</a>
-
-                    <!-- MOBILE AUTH -->
-                    <div class="mobileAuth">
-
-                        <a href="./login.html" class="loginBtn mobile-nav-link">
-                            Login
-                        </a>
-
-                        <a href="./signup.html"
-                            class="signupBtn bg-indigo-600 text-white px-4 py-2 rounded-lg text-center">
-                            Sign Up
-                        </a>
-
-                    </div>
-
-                    <!-- MOBILE USER -->
-                    <div class="userProfile hidden px-4 space-y-2">
-
-                        <div class="flex items-center space-x-3 bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
-                            <span
-                                class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold userInitial">U</span>
-                            <span class="userEmail text-sm"></span>
-                        </div>
-
-                        <button class="logoutBtn text-left text-red-500 px-4 py-2">
-                            Sign Out
-                        </button>
-
-                    </div>
-
-                </nav>
-            </div>
-
-        </div>
-    </header>
-
-    <!-- HERO SECTION (Optional - you can keep or remove) -->
-    <section class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 py-12">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Our Products</h1>
-            <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Browse our collection of high-quality products curated just for you
-            </p>
-        </div>
+  <main id="main" class="flex-1">
+    <section class="border-b border-gray-200 bg-linear-to-r from-indigo-50 to-purple-50 py-8 md:py-10 dark:border-gray-800 dark:from-gray-900 dark:to-gray-950">
+      <div class="container-page">
+        <nav aria-label="Breadcrumb" class="text-sm text-gray-500 dark:text-gray-400">
+          <a href="/index.html" class="hover:text-indigo-600">Home</a> <span aria-hidden="true">/</span> <span>Shop</span>
+        </nav>
+        <h1 id="shopTitle" class="mt-2 text-3xl font-bold text-gray-900 md:text-4xl dark:text-white">All products</h1>
+        <p class="mt-1 text-gray-600 dark:text-gray-300">Browse our collection of quality products.</p>
+      </div>
     </section>
 
-    <div class="w-[80%] justify-between m-auto mb-6 flex flex-col sm:flex-row gap-4">
+    <div class="container-page py-6 md:py-8">
+      <!-- Toolbar -->
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div class="relative flex-1">
+          <label for="searchInput" class="sr-only">Search products</label>
+          <svg class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.2-5.2m0 0A7.5 7.5 0 105.2 5.2a7.5 7.5 0 0010.6 10.6z"/></svg>
+          <input id="searchInput" type="search" placeholder="Search by name, brand or category…" class="input pl-10" autocomplete="off">
+        </div>
+        <div class="flex gap-3">
+          <button type="button" id="filtersToggle" class="btn-secondary flex-1 lg:hidden" aria-expanded="false" aria-controls="filtersPanel">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
+            Filters <span id="filterCount" class="badge hidden bg-indigo-600 text-white"></span>
+          </button>
+          <label for="sortSelect" class="sr-only">Sort by</label>
+          <select id="sortSelect" class="input flex-1 sm:w-52 sm:flex-none">
+            <option value="featured">Sort: Featured</option>
+            <option value="price-asc">Price: low to high</option>
+            <option value="price-desc">Price: high to low</option>
+            <option value="rating">Top rated</option>
+            <option value="discount">Biggest discount</option>
+            <option value="name">Name: A–Z</option>
+            <option value="name-desc">Name: Z–A</option>
+          </select>
+        </div>
+      </div>
 
-        <input id="searchInput" type="text" placeholder="Search products..."
-            class="border p-2 text-gray-200 rounded w-full bg-[#111827] sm:w-1/2">
+      <div class="mt-6 grid gap-8 lg:grid-cols-[16rem_1fr]">
+        <!-- Filters: collapsible panel on mobile, sidebar on desktop -->
+        <aside id="filtersPanel" class="hidden lg:block" aria-label="Filters">
+          <div class="card space-y-6 p-5 lg:sticky lg:top-24">
+            <fieldset>
+              <legend class="mb-3 text-sm font-semibold">Category</legend>
+              <div id="categoryList" class="max-h-72 space-y-1 overflow-y-auto pr-1"></div>
+            </fieldset>
 
-        <select id="categoryFilter" class="border p-2 text-gray-200 font-normal rounded w-full bg-[#111827] sm:w-1/4">
-            <option value="all">All Categories</option>
-            <option value="Gaming">Games</option>
-            <option value="Accessories">Accessories</option>
-            <option value="Electronics">Electronics</option>
-        </select>
+            <fieldset>
+              <legend class="mb-3 text-sm font-semibold">Price (₦)</legend>
+              <div class="flex items-center gap-2">
+                <label for="minPrice" class="sr-only">Minimum price</label>
+                <input id="minPrice" type="number" min="0" inputmode="numeric" placeholder="Min" class="input">
+                <span class="text-gray-400" aria-hidden="true">–</span>
+                <label for="maxPrice" class="sr-only">Maximum price</label>
+                <input id="maxPrice" type="number" min="0" inputmode="numeric" placeholder="Max" class="input">
+              </div>
+            </fieldset>
 
+            <fieldset class="space-y-3">
+              <legend class="mb-3 text-sm font-semibold">Availability</legend>
+              <label class="flex items-center gap-3 text-sm"><input type="checkbox" id="inStockOnly" class="h-4 w-4 rounded accent-indigo-600"> In stock only</label>
+              <label class="flex items-center gap-3 text-sm"><input type="checkbox" id="onSaleOnly" class="h-4 w-4 rounded accent-indigo-600"> On sale</label>
+            </fieldset>
+
+            <button type="button" id="clearFilters" class="btn-secondary w-full">Clear all filters</button>
+          </div>
+        </aside>
+
+        <section aria-labelledby="shopTitle">
+          <div class="mb-4 flex flex-wrap items-center gap-2">
+            <p id="resultCount" class="mr-2 text-sm text-gray-600 dark:text-gray-400" aria-live="polite"></p>
+            <div id="activeChips" class="flex flex-wrap gap-2"></div>
+          </div>
+          <div id="productGrid" class="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 md:gap-6 xl:grid-cols-3" aria-busy="true"></div>
+          <nav id="pagination" class="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="Pagination"></nav>
+        </section>
+      </div>
     </div>
+  </main>
 
-    <!-- PRODUCTS SECTION -->
-    <section class="max-w-7xl mx-auto px-4 py-12">
-
-        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        </div>
-
-    </section>
-
-    <!-- FOOTER (Same as index.html) -->
-    <footer class="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-                <!-- Company Info -->
-                <div class="space-y-4">
-                    <img src="../multimedia/image.png" alt="PrimeLane" class="h-12 w-auto rounded-full">
-                    <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                        Your premier destination for online shopping. Quality products, unbeatable prices, and
-                        exceptional service.
-                    </p>
-                </div>
-
-                <!-- Quick Links -->
-                <div>
-                    <h3 class="font-semibold text-lg mb-4">Quick Links</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#"
-                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">About
-                                Us</a></li>
-                        <li><a href="#contact-section"
-                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Contact</a>
-                        </li>
-                        <li><a href="#"
-                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">FAQ</a>
-                        </li>
-                        <li><a href="#"
-                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Blog</a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Customer Service -->
-                <div>
-                    <h3 class="font-semibold text-lg mb-4">Customer Service</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#"
-                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Shipping
-                                Policy</a></li>
-                        <li><a href="#"
-                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Returns
-                                & Exchanges</a></li>
-                        <li><a href="#"
-                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Privacy
-                                Policy</a></li>
-                        <li><a href="#"
-                                class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Terms
-                                of Service</a></li>
-                    </ul>
-                </div>
-
-                <!-- Newsletter -->
-                <div>
-                    <h3 class="font-semibold text-lg mb-4">Stay Updated</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Subscribe to get special offers and
-                        updates.</p>
-                </div>
-            </div>
-
-            <!-- Bottom bar -->
-            <div class="border-t border-gray-200 dark:border-gray-700 mt-12 pt-8 text-center">
-                <p class="text-sm text-gray-600 dark:text-gray-400">
-                    © 2026 PrimeLane. All rights reserved. |
-                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Privacy</a> |
-                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Terms</a> |
-                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Sitemap</a>
-                </p>
-            </div>
-        </div>
-    </footer>
-
-    <div id="toastContainer" class="fixed top-5 right-5 space-y-3 z-50"></div>
-
-    <script type="module" src="../js/shop.js"></script>
+  <div id="site-footer"></div>
+  <script type="module" src="/js/shop.js"></script>
 </body>
 
 </html>

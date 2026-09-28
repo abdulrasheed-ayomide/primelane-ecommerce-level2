@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security rules check | PrimeLane (developer tool)</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}</script>
+</head>
+
+<!--
+  Developer tool: checks the Firestore security rules that are LIVE on
+  e-commerce-website-proje-9af1a, using the Firebase Web SDK (no CLI).
+  Open it through Live Server: http://127.0.0.1:5501/tests/rules-check.html
+  It is not linked from the site and is excluded from Vercel deploys (.vercelignore).
+
+  Every probe is safe: blocked writes change nothing. If a write that should be
+  blocked goes through (rules not deployed), the page reverts it and reports FAIL.
+-->
+
+<body class="min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-950">
+  <main class="mx-auto max-w-3xl space-y-6">
+    <header>
+      <h1 class="text-2xl font-bold">Firestore security rules check</h1>
+      <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Runs real requests against the live project with the Firebase Web SDK and compares each result with what the rules should allow.</p>
+    </header>
+
+    <section class="card p-5 text-sm">
+      <p id="who">Checking sign-in…</p>
+      <p class="mt-2 text-gray-600 dark:text-gray-400">Signed out → runs the <strong>anonymous</strong> checks. Log in on the site as a customer or admin (verified email) and reload this page to run those checks too.</p>
+      <button type="button" id="run" class="btn-primary mt-4" disabled>Run checks</button>
+    </section>
+
+    <section class="card overflow-hidden">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-800/50">
+          <tr><th class="px-4 py-2">Check</th><th class="px-4 py-2">Expected</th><th class="px-4 py-2">Actual</th><th class="px-4 py-2">Result</th></tr>
+        </thead>
+        <tbody id="results" class="divide-y divide-gray-200 dark:divide-gray-800"></tbody>
+      </table>
+      <p id="summary" class="border-t border-gray-200 p-4 text-sm font-semibold dark:border-gray-800"></p>
+    </section>
+  </main>
+
+  <script type="module">
+    import {
+      db, auth, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, query, where, limit, serverTimestamp,
+    } from "/js/firebase.js";
+    import { authReady } from "/js/auth.js";
+    import { escapeHTML } from "/js/utils.js";
+
+    const results = document.getElementById("results");
+    const runBtn = document.getElementById("run");
+    let passed = 0, failed = 0;
+
+    function row(name, expected, actual, note = "") {
+      const ok = expected === actual;
+      ok ? passed++ : failed++;
+      results.insertAdjacentHTML("beforeend", `
+        <tr>
+          <td class="px-4 py-2">${escapeHTML(name)}${note ? `<br><span class="text-xs text-gray-500">${escapeHTML(note)}</span>` : ""}</td>
+          <td class="px-4 py-2">${expected}</td>
+          <td class="px-4 py-2">${actual}</td>
+          <td class="px-4 py-2 font-bold ${ok ? "text-green-700 dark:text-green-400" : "text-red-600"}">${ok ? "PASS" : "FAIL"}</td>
+        </tr>`);
+    }
+
+    /** Run an operation and report "allowed" or "denied". Other errors are shown as-is. */
+    async function attempt(fn) {
+      try {
+        await fn();
+        return "allowed";
+      } catch (error) {
+        if (error?.code === "permission-denied") return "denied";
+        return `error (${error?.code || error?.message})`;
+      }
+    }
+
+    async function check(name, expected, fn, { undo, note } = {}) {
+      const actual = await attempt(fn);
+      if (actual === "allowed" && expected === "denied" && undo) {
+        try { await undo(); } catch {}
+      }
+      row(name, expected, actual, note);
+      return actual;
+    }
+
+    const PROBE = "__rules_check_probe";
+
+    async function anonymousChecks() {
+      const p1 = await getDoc(doc(db, "products", "1"));
+      const settings = await getDoc(doc(db, "settings", "store"));
+      await check("Read products", "allowed", () => getDocs(query(collection(db, "products"), limit(1))));
+      await check("Create a product", "denied",
+        () => setDoc(doc(db, "products", PROBE), { title: "Rules probe", category: "Test", price: 1, stock: 0 }),
+        { undo: () => deleteDoc(doc(db, "products", PROBE)) });
+      if (p1.exists()) {
+        await check("Edit a product (price)", "denied", () => updateDoc(doc(db, "products", "1"), { price: p1.data().price }),
+          { note: "writes the current price, so nothing changes even if allowed" });
+        await check("Edit a product (stock)", "denied", () => updateDoc(doc(db, "products", "1"), { stock: p1.data().stock }));
+      }
+      await check("Delete a product", "denied", () => deleteDoc(doc(db, "products", `${PROBE}_missing`)),
+        { note: "targets a product that doesn't exist" });
+      await check("List users", "denied", () => getDocs(query(collection(db, "users"), limit(1))));
+      await check("List orders", "denied", () => getDocs(query(collection(db, "orders"), limit(1))));
+      await check("List contact messages", "denied", () => getDocs(query(collection(db, "messages"), limit(1))));
+      if (settings.exists()) {
+        await check("Change store settings", "denied", () => setDoc(doc(db, "settings", "store"), settings.data()));
+      }
+      await check("Create an admin user profile", "denied",
+        () => setDoc(doc(db, "users", PROBE), { email: "x@example.com", fullName: "X", role: "admin", status: "active" }),
+        { undo: () => deleteDoc(doc(db, "users", PROBE)) });
+    }
+
+    /** Denied for everyone under the new rules, allowed under the old open rules. */
+    async function rulesAreLive() {
+      const actual = await check("Rules are deployed (write to an unknown collection)", "denied",
+        () => setDoc(doc(db, "categories", PROBE), { name: "x" }),
+        { undo: () => deleteDoc(doc(db, "categories", PROBE)) });
+      return actual === "denied";
+    }
+
+    async function customerChecks(user, profile) {
+      const me = doc(db, "users", user.uid);
+      const p1 = await getDoc(doc(db, "products", "1"));
+      await check("Customer: read own profile", "allowed", () => getDoc(me));
+      await check("Customer: make themselves admin", "denied", () => updateDoc(me, { role: "admin" }),
+        { undo: () => updateDoc(me, { role: "customer" }) });
+      await check("Customer: list all users", "denied", () => getDocs(query(collection(db, "users"), limit(1))));
+      await check("Customer: list ALL orders", "denied", () => getDocs(query(collection(db, "orders"), limit(1))));
+      await check("Customer: list own orders", "allowed", () => getDocs(query(collection(db, "orders"), where("userId", "==", user.uid))));
+      if (p1.exists()) {
+        await check("Customer: edit a product price", "denied", () => updateDoc(doc(db, "products", "1"), { price: p1.data().price }));
+      }
+      await check("Customer: create a product", "denied",
+        () => setDoc(doc(db, "products", PROBE), { title: "Probe", category: "Test", price: 1, stock: 0 }),
+        { undo: () => deleteDoc(doc(db, "products", PROBE)) });
+      await check("Customer: read contact messages", "denied", () => getDocs(query(collection(db, "messages"), limit(1))));
+      // Another customer's order: find one via our own list is impossible by design, so try a random id.
+      await check("Customer: read a random order id", "denied", () => getDoc(doc(db, "orders", "someone-elses-order")),
+        { note: "a missing order is still denied, because the rules can't prove it's yours" });
+    }
+
+    async function adminChecks() {
+      const id = `${PROBE}_${Date.now()}`;
+      await check("Admin: create a product", "allowed",
+        () => setDoc(doc(db, "products", id), { title: "Rules probe (safe to delete)", category: "Test", price: 1, stock: 0, createdAt: serverTimestamp() }));
+      await check("Admin: edit price and stock", "allowed", () => updateDoc(doc(db, "products", id), { price: 2, stock: 5 }));
+      await check("Admin: delete a product", "allowed", () => deleteDoc(doc(db, "products", id)));
+      await check("Admin: list orders", "allowed", () => getDocs(query(collection(db, "orders"), limit(1))));
+      await check("Admin: list customers", "allowed", () => getDocs(query(collection(db, "users"), limit(1))));
+      await check("Admin: read contact messages", "allowed", () => getDocs(query(collection(db, "messages"), limit(1))));
+      await check("Admin: delete an order", "denied", () => deleteDoc(doc(db, "orders", `${PROBE}_missing`)),
+        { note: "orders are permanent records" });
+    }
+
+    const state = await authReady();
+    const who = document.getElementById("who");
+    who.textContent = state.user
+      ? `Signed in as ${state.user.email} (role: ${state.profile?.role ?? "unknown"}, email verified).`
+      : state.unverifiedUser
+        ? `Signed in as ${state.unverifiedUser.email}, but the email is NOT verified, so only the anonymous checks will run.`
+        : "Not signed in: running anonymous checks.";
+    runBtn.disabled = false;
+
+    runBtn.addEventListener("click", async () => {
+      runBtn.disabled = true;
+      results.innerHTML = "";
+      passed = failed = 0;
+      const summary = document.getElementById("summary");
+      summary.textContent = "Running…";
+
+      const live = await rulesAreLive();
+      if (!live) {
+        summary.textContent = "The new rules are NOT live: the test write went through (it was deleted again). Publish firestore.rules in the Firebase console, wait a minute, then run again.";
+        summary.className = "border-t border-gray-200 p-4 text-sm font-semibold text-red-600";
+        runBtn.disabled = false;
+        return;
+      }
+      if (state.user && state.profile?.role === "admin") await adminChecks();
+      else if (state.user) await customerChecks(state.user, state.profile);
+      else await anonymousChecks(); // signed out, or signed in with an unverified email
+
+      summary.textContent = `${passed} passed, ${failed} failed.`;
+      summary.className = `border-t border-gray-200 p-4 text-sm font-semibold ${failed ? "text-red-600" : "text-green-700 dark:text-green-400"}`;
+      runBtn.disabled = false;
+    });
+  </script>
+</body>
+
+</html>

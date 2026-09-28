@@ -2,103 +2,77 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - PrimeLane</title>
-    <link rel="shortcut icon" href="../multimedia/imgi_17_best-ecommerce-website-design-cover.jpg" type="image/x-icon">
-
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create account | PrimeLane</title>
+  <link rel="icon" href="/multimedia/imgi_17_best-ecommerce-website-design-cover.jpg">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script>try{var t=localStorage.getItem("theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}</script>
 </head>
 
-<body class="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center p-4">
+<body class="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-950">
+  <main id="main" class="w-full max-w-md">
+    <a href="/index.html" class="mb-6 flex justify-center" aria-label="PrimeLane home">
+      <img src="/multimedia/image.png" alt="PrimeLane" class="h-12 w-auto">
+    </a>
 
-    <!-- Main Container -->
-    <div class="w-full max-w-md">
+    <div class="card overflow-hidden shadow-xl">
+      <div class="bg-linear-to-r from-indigo-600 to-indigo-800 px-6 py-8 text-center">
+        <h1 class="text-2xl font-bold text-white sm:text-3xl">Welcome to PrimeLane</h1>
+        <p class="mt-1 text-sm text-indigo-100">Create your account to get started</p>
+      </div>
 
-        <!-- Card Container -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden"> 
-
-            <!-- Header -->
-            <div class="bg-linear-to-r from-indigo-600 to-indigo-800 px-6 py-8 text-center">
-                <h2 class="text-3xl font-bold text-white mb-2">Welcome to PrimeLane</h2>
-                <p class="text-indigo-100 text-sm">Create your account to get started</p>
-            </div>
-
-            <!-- Form -->
-            <form id="signupForm" class="p-6 md:p-8 space-y-5">
-
-                <!-- Full Name -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Full Name
-                    </label>
-                    <input type="text" placeholder="Ayo mide" name="fullname" class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 
-                                  bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                                  focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                </div>
-
-                <!-- Email -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Email Address
-                    </label>
-                    <input type="email" placeholder="you@example.com" name="email" class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 
-                                  bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                                  focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                </div>
-
-                <!-- Password -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Password
-                    </label>
-                    <input type="password" placeholder="••••••••" name="password" class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 
-                                  bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                                  focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                </div>
-
-                <!-- Terms Checkbox -->
-                <div class="flex items-center">
-                    <input type="checkbox" id="terms"
-                        class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                    <label for="terms" class="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                        I agree to the
-                        <a href="#" class="text-indigo-600 hover:underline">Terms</a>
-                        and
-                        <a href="#" class="text-indigo-600 hover:underline">Privacy Policy</a>
-                    </label>
-                </div>
-
-                <!-- Sign Up Button -->
-                <button type="submit" class="w-full bg-indigo-600 text-white py-3.5 px-6 rounded-lg 
-                               hover:bg-indigo-700 font-semibold text-base
-                               transition-all duration-200 hover:shadow-xl
-                               focus:ring-4 focus:ring-indigo-300">
-                    Sign Up
-                </button>
-
-                <!-- Login Link -->
-                <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-                    Already have an account?
-                    <a href="login.html" class="text-indigo-600 hover:text-indigo-700 font-medium hover:underline">
-                        Log in
-                    </a>
-                </p>
-            </form>
+      <div id="signupDone" class="hidden space-y-4 p-6 text-center md:p-8" role="status">
+        <svg class="mx-auto h-12 w-12 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+        <h2 class="text-xl font-bold">Check your email</h2>
+        <p class="text-sm text-gray-600 dark:text-gray-400">Your account was created. We sent a verification link to <strong id="doneEmail" class="break-all text-gray-900 dark:text-white"></strong>. Open it to verify your account, then log in.</p>
+        <p class="text-xs text-gray-500">Can't find it? Check your spam folder.</p>
+        <div class="flex flex-col gap-2">
+          <a href="/pages/login.html" id="doneLoginLink" class="btn-primary btn-lg w-full">I've verified my email: log in</a>
+          <button type="button" id="doneResendBtn" class="btn-secondary w-full">Resend verification email</button>
+          <p id="doneResendStatus" class="text-xs" aria-live="polite"></p>
         </div>
+      </div>
 
-        <!-- Back to Home -->
-        <div class="text-center mt-4">
-            <a href="/index.html" class="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600">
-                ← Back to Home
-            </a>
+      <form id="signupForm" class="space-y-5 p-6 md:p-8" novalidate>
+        <div id="formError" class="hidden rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/50 dark:text-red-300" role="alert"></div>
+        <div>
+          <label for="fullname" class="label">Full name</label>
+          <input id="fullname" name="fullname" type="text" autocomplete="name" maxlength="100" class="input" required>
         </div>
+        <div>
+          <label for="email" class="label">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" class="input" required>
+        </div>
+        <div>
+          <label for="password" class="label">Password</label>
+          <div class="relative">
+            <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" class="input pr-16" aria-describedby="password-hint" required>
+            <button type="button" data-toggle-password="password" class="absolute inset-y-0 right-0 px-3 text-sm font-medium text-gray-500 hover:text-gray-800 dark:hover:text-gray-200" aria-label="Show password">Show</button>
+          </div>
+          <p id="password-hint" class="mt-1 text-xs text-gray-500">At least 8 characters, with at least one letter and one number.</p>
+        </div>
+        <div>
+          <label for="confirmPassword" class="label">Confirm password</label>
+          <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" class="input" required>
+        </div>
+        <div>
+          <label class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <input type="checkbox" id="terms" name="terms" class="mt-0.5 h-4 w-4 accent-indigo-600" required>
+            <span>I agree to PrimeLane's terms of service and privacy policy.</span>
+          </label>
+        </div>
+        <button type="submit" class="btn-primary btn-lg w-full">Create account</button>
+        <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+          Already have an account? <a href="/pages/login.html" id="loginLink" class="font-medium text-indigo-600 hover:underline dark:text-indigo-400">Log in</a>
+        </p>
+      </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="module" src="../js/signup.js"></script>
+    <p class="mt-6 text-center"><a href="/index.html" class="text-sm text-gray-600 hover:text-indigo-600 dark:text-gray-400">← Back to home</a></p>
+  </main>
+
+  <script type="module" src="/js/signup.js"></script>
 </body>
 
 </html>

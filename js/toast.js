@@ -1,40 +1,46 @@
-export function showToast(message, type = "info") {
+// Toast notifications. Creates its own container, so pages don't need one.
+const ICONS = { success: "✓", error: "✕", warning: "!", info: "i" };
+const COLORS = {
+  success: "bg-green-600",
+  error: "bg-red-600",
+  warning: "bg-amber-500",
+  info: "bg-gray-900 dark:bg-gray-700",
+};
 
-  const container = document.getElementById("toastContainer");
+function getContainer() {
+  let container = document.getElementById("toastContainer");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toastContainer";
+    document.body.appendChild(container);
+  }
+  container.className =
+    "pointer-events-none fixed inset-x-4 top-4 z-[100] flex flex-col items-center gap-2 sm:inset-x-auto sm:right-4 sm:items-end";
+  container.setAttribute("role", "status");
+  container.setAttribute("aria-live", "polite");
+  return container;
+}
 
-  if (!container) return;
-
+export function showToast(message, type = "info", duration = 3500) {
+  const container = getContainer();
   const toast = document.createElement("div");
+  toast.className = `${COLORS[type] ?? COLORS.info} pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg px-4 py-3 text-sm text-white shadow-lg transition duration-300 opacity-0 -translate-y-2`;
 
-  const colors = {
-    success: "bg-green-600",
-    error: "bg-red-600",
-    warning: "bg-yellow-500",
-    info: "bg-blue-600"
-  };
+  const icon = document.createElement("span");
+  icon.className = "mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/25 text-xs font-bold";
+  icon.setAttribute("aria-hidden", "true");
+  icon.textContent = ICONS[type] ?? ICONS.info;
 
-  toast.className = `
-    ${colors[type]}
-    text-white px-4 py-3 rounded-lg shadow-lg
-    transform transition duration-300
-    opacity-0 translate-x-10
-  `;
+  const text = document.createElement("p");
+  text.className = "flex-1";
+  text.textContent = message; // textContent, never innerHTML, for user-facing messages
 
-  toast.textContent = message;
-
+  toast.append(icon, text);
   container.appendChild(toast);
 
+  requestAnimationFrame(() => toast.classList.remove("opacity-0", "-translate-y-2"));
   setTimeout(() => {
-    toast.classList.remove("opacity-0", "translate-x-10");
-  }, 50);
-
-  setTimeout(() => {
-
-    toast.classList.add("opacity-0","translate-x-10");
-
-    setTimeout(() => {
-      toast.remove();
-    }, 300);
-
-  }, 3000);
+    toast.classList.add("opacity-0", "-translate-y-2");
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
 }

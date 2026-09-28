@@ -1,0 +1,257 @@
+rules_version = '2';
+
+// PrimeLane Firestore security rules.
+//
+// Collections
+//   users/{uid}         profile + role ("customer" | "admin") + status ("active" | "suspended")
+//   products/{id}       catalog (public read, admin write; customers may only reduce stock while ordering)
+//   orders/{id}         created by the customer, readable by owner + admins, status changed by admins
+//   settings/store      delivery fee settings (public read, admin write)
+//   messages/{id}       contact form (anyone can create, admins read/manage)
+//
+// There are no categories / carts / reviews collections: categories are derived from
+// products, and the cart lives in the browser. Anything not matched below is denied,
+// so those (and any other) collections cannot be read or written.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Signed in AND the email address has been verified. request.auth.token is the
+    // Firebase ID token, which Firestore verifies server-side on every request.
+    function verified() {
+      return signedIn() && request.auth.token.email_verified == true;
+    }
+
+    function docPath(collectionName, id) {
+      return /databases/$(database)/documents/$(collectionName)/$(id);
+    }
+
+    function isAdmin() {
+      return verified() && get(docPath('users', request.auth.uid)).data.get('role', 'customer') == 'admin';
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    function isShortString(value, maxLen) {
+      return value is string && value.size() <= maxLen;
+    }
+
+    function isRequiredString(value, maxLen) {
+      return value is string && value.size() > 0 && value.size() <= maxLen;
+    }
+
+    function closeTo(a, b) {
+      return math.abs(a - b) < 0.01;
+    }
+
+    // Must match MAX_CART_LINES in js/config.js. Kept at 8 so an order stays within
+    // Firestore's limit of 10 document lookups per rule evaluation.
+    function maxOrderLines() {
+      return 8;
+    }
+
+    // ---------- users ----------
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+
+      // A new customer creates their own profile right after sign-up (before verifying
+      // their email, so their name is saved). They cannot make themselves admin.
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['email', 'fullName', 'role', 'status', 'phone', 'address', 'city', 'state', 'country', 'createdAt', 'updatedAt'])
+        && request.resource.data.role == 'customer'
+        && request.resource.data.status == 'active'
+        && request.resource.data.email == request.auth.token.email
+        && isShortString(request.resource.data.fullName, 100);
+
+      // Customers edit their own contact details. role / status / email are locked.
+      // (Legacy documents may get role "customer" and status "active" filled in, and
+      // the old plain-text "password" field may only be removed, never written.)
+      allow update: if signedIn() && request.auth.uid == uid
+        && changedKeys().hasOnly(['fullName', 'phone', 'address', 'city', 'state', 'country', 'updatedAt', 'password', 'role', 'status'])
+        && !('password' in request.resource.data)
+        && request.resource.data.get('role', 'customer') == resource.data.get('role', 'customer')
+        && request.resource.data.get('status', 'active') == resource.data.get('status', 'active')
+        && isShortString(request.resource.data.get('fullName', ''), 100)
+        && isShortString(request.resource.data.get('phone', ''), 30)
+        && isShortString(request.resource.data.get('address', ''), 200)
+        && isShortString(request.resource.data.get('city', ''), 100)
+        && isShortString(request.resource.data.get('state', ''), 100)
+        && isShortString(request.resource.data.get('country', ''), 100);
+
+      // Admins can suspend / re-activate CUSTOMER accounts and clean up stored passwords.
+      // They cannot touch other admin accounts, and nobody can change a role from the app:
+      // roles are changed only in the Firebase console (see README).
+      allow update: if isAdmin()
+        && resource.data.get('role', 'customer') != 'admin'
+        && changedKeys().hasOnly(['status', 'updatedAt', 'password'])
+        && !('password' in request.resource.data)
+        && request.resource.data.get('status', 'active') in ['active', 'suspended'];
+
+      allow delete: if false;
+    }
+
+    // ---------- products ----------
+
+    function validProduct(d) {
+      return isRequiredString(d.title, 120)
+        && isRequiredString(d.category, 40)
+        && d.price is number && d.price > 0
+        && d.stock is int && d.stock >= 0
+        // https URLs, or the small base64 images some original products embed (~13 KB)
+        && isShortString(d.get('image', ''), 20000)
+        && isShortString(d.get('description', ''), 2000);
+    }
+
+    // While placing an order, a customer's transaction reduces stock by exactly the
+    // quantity in their new order (created in the same transaction).
+    function isCheckoutStockUpdate(productId) {
+      return verified()
+        && changedKeys().hasOnly(['stock', 'lastOrderId', 'updatedAt'])
+        && ('lastOrderId' in request.resource.data)
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.stock is int
+        && request.resource.data.stock >= 0
+        && matchesNewOrder(productId);
+    }
+
+    function matchesNewOrder(productId) {
+      let order = getAfter(docPath('orders', request.resource.data.lastOrderId)).data;
+      return order.userId == request.auth.uid
+        && order.createdAt == request.time
+        && order.quantities.get(productId, 0) == resource.data.stock - request.resource.data.stock;
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isAdmin() && validProduct(request.resource.data);
+      allow update: if isCheckoutStockUpdate(productId)
+        || (isAdmin() && validProduct(request.resource.data));
+      allow delete: if isAdmin();
+    }
+
+    // ---------- settings ----------
+
+    match /settings/store {
+      allow read: if true;
+      allow write: if isAdmin()
+        && request.resource.data.deliveryFee is number && request.resource.data.deliveryFee >= 0
+        && request.resource.data.freeDeliveryThreshold is number && request.resource.data.freeDeliveryThreshold >= 0;
+    }
+
+    // ---------- orders ----------
+
+    function validCustomer(c) {
+      return c.keys().hasOnly(['fullName', 'email', 'phone'])
+        && isRequiredString(c.fullName, 100)
+        && isRequiredString(c.email, 200)
+        && isRequiredString(c.phone, 30);
+    }
+
+    function validShipping(s) {
+      return s.keys().hasOnly(['address', 'city', 'state', 'country'])
+        && isRequiredString(s.address, 200)
+        && isRequiredString(s.city, 100)
+        && isRequiredString(s.state, 100)
+        && isRequiredString(s.country, 100);
+    }
+
+    // One order line must use the product's real price, name and image, and the
+    // product must have been stock-updated for this order in the same transaction.
+    function validLine(d, orderId, i) {
+      let line = d.items[i];
+      let product = getAfter(docPath('products', line.productId)).data;
+      return line.keys().hasOnly(['productId', 'title', 'image', 'price', 'quantity', 'lineTotal'])
+        && d.productIds[i] == line.productId
+        && d.quantities.get(line.productId, 0) == line.quantity
+        && line.quantity is int && line.quantity >= 1 && line.quantity <= 20
+        && line.price == product.price
+        && line.title == product.title
+        && closeTo(line.lineTotal, line.price * line.quantity)
+        && product.get('lastOrderId', '') == orderId;
+    }
+
+    function lineOk(d, orderId, i) {
+      return i >= d.items.size() || validLine(d, orderId, i);
+    }
+
+    function lineTotalAt(d, i) {
+      return i < d.items.size() ? d.items[i].lineTotal : 0;
+    }
+
+    function itemsSubtotal(d) {
+      return lineTotalAt(d, 0) + lineTotalAt(d, 1) + lineTotalAt(d, 2) + lineTotalAt(d, 3)
+        + lineTotalAt(d, 4) + lineTotalAt(d, 5) + lineTotalAt(d, 6) + lineTotalAt(d, 7);
+    }
+
+    function validShippingFee(d) {
+      let settings = get(docPath('settings', 'store')).data;
+      let freeDelivery = settings.freeDeliveryThreshold > 0 && d.subtotal >= settings.freeDeliveryThreshold;
+      return d.shippingFee == (freeDelivery ? 0 : settings.deliveryFee);
+    }
+
+    function validNewOrder(orderId) {
+      let d = request.resource.data;
+      return verified()
+        && d.keys().hasOnly(['userId', 'customer', 'shipping', 'items', 'productIds', 'quantities', 'itemCount', 'subtotal', 'shippingFee', 'total', 'currency', 'status', 'statusHistory', 'createdAt', 'updatedAt'])
+        && d.userId == request.auth.uid
+        && get(docPath('users', request.auth.uid)).data.get('status', 'active') == 'active'
+        && d.status == 'placed'
+        && d.statusHistory is list && d.statusHistory.size() == 1 && d.statusHistory[0].status == 'placed'
+        && d.createdAt == request.time
+        && d.updatedAt == request.time
+        && d.currency == 'NGN'
+        && validCustomer(d.customer)
+        && validShipping(d.shipping)
+        && d.items is list && d.items.size() >= 1 && d.items.size() <= maxOrderLines()
+        && d.productIds is list && d.productIds.size() == d.items.size()
+        && d.quantities is map && d.quantities.size() == d.items.size()
+        && d.itemCount is int && d.itemCount >= 1
+        && lineOk(d, orderId, 0) && lineOk(d, orderId, 1) && lineOk(d, orderId, 2) && lineOk(d, orderId, 3)
+        && lineOk(d, orderId, 4) && lineOk(d, orderId, 5) && lineOk(d, orderId, 6) && lineOk(d, orderId, 7)
+        && d.subtotal is number && closeTo(d.subtotal, itemsSubtotal(d))
+        && validShippingFee(d)
+        && closeTo(d.total, d.subtotal + d.shippingFee);
+    }
+
+    match /orders/{orderId} {
+      // Owners see their own orders; admins see all.
+      allow read: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+
+      allow create: if validNewOrder(orderId);
+
+      // Only admins move an order through its statuses, adding one history entry each time.
+      allow update: if isAdmin()
+        && changedKeys().hasOnly(['status', 'statusHistory', 'updatedAt'])
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.status in ['placed', 'confirmed', 'processing', 'shipped', 'out_for_delivery', 'delivered', 'cancelled', 'failed']
+        && request.resource.data.statusHistory.size() == resource.data.statusHistory.size() + 1
+        && request.resource.data.statusHistory[request.resource.data.statusHistory.size() - 1].status == request.resource.data.status;
+
+      allow delete: if false;
+    }
+
+    // ---------- contact messages ----------
+
+    match /messages/{messageId} {
+      allow create: if request.resource.data.keys().hasOnly(['name', 'email', 'subject', 'message', 'read', 'createdAt'])
+        && isRequiredString(request.resource.data.name, 100)
+        && isRequiredString(request.resource.data.email, 200)
+        && isRequiredString(request.resource.data.subject, 150)
+        && isRequiredString(request.resource.data.message, 3000)
+        && request.resource.data.read == false
+        && request.resource.data.createdAt == request.time;
+      allow read, delete: if isAdmin();
+      allow update: if isAdmin() && changedKeys().hasOnly(['read']);
+    }
+  }
+}

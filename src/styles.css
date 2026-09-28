@@ -1,0 +1,92 @@
+/*
+ * PrimeLane stylesheet (Tailwind CSS v4).
+ * Build:  npm run build:css   ->  css/styles.css
+ * Watch:  npm run dev
+ */
+@import "tailwindcss";
+
+/* Scan the HTML pages and JS modules for class names. */
+@source "../index.html";
+@source "../404.html";
+@source "../pages";
+@source "../tests";
+@source "../js";
+
+/* Dark mode is toggled by adding `.dark` to <html> (see js/header.js). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
+  --color-secondary: #7c3aed;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --animate-bounce-slow: bounce-slow 3s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+
+  @keyframes bounce-slow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -600px 0; }
+    100% { background-position: 600px 0; }
+  }
+}
+
+@layer base {
+  html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+  body { @apply bg-white text-gray-800 antialiased dark:bg-gray-950 dark:text-gray-100; }
+
+  /* One consistent, visible keyboard focus style everywhere. */
+  :focus-visible { @apply outline-2 outline-offset-2 outline-indigo-500; }
+
+  /* Tailwind v4 resets the cursor on buttons; restore it. */
+  button:not(:disabled), [role="button"] { cursor: pointer; }
+
+  dialog::backdrop { background: rgb(17 24 39 / 0.6); backdrop-filter: blur(2px); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  }
+}
+
+/* Reusable component classes. @utility lets them be combined with @apply and variants. */
+@utility btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60; }
+@utility btn-primary { @apply btn bg-indigo-600 text-white hover:bg-indigo-700 disabled:hover:bg-indigo-600; }
+@utility btn-secondary { @apply btn border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800; }
+@utility btn-danger { @apply btn bg-red-600 text-white hover:bg-red-700; }
+@utility btn-ghost { @apply btn text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800; }
+@utility btn-lg { @apply px-6 py-3 text-base; }
+@utility icon-btn { @apply inline-flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-gray-200 dark:hover:bg-gray-800; }
+
+@utility label { @apply mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300; }
+@utility input {
+  @apply block w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-base text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 focus:outline-none sm:text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100;
+  &[aria-invalid="true"] { @apply border-red-500 focus:border-red-500 focus:ring-red-500/30; }
+}
+@utility field-error { @apply mt-1 text-sm text-red-600 dark:text-red-400; }
+
+@utility card { @apply rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900; }
+@utility badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap; }
+@utility container-page { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
+
+@utility skeleton {
+  @apply rounded-md bg-gray-200 dark:bg-gray-800;
+  background-image: linear-gradient(90deg, transparent 0, rgb(255 255 255 / 0.45) 50%, transparent 100%);
+  background-size: 600px 100%;
+  background-repeat: no-repeat;
+  animation: var(--animate-shimmer);
+  &:where(.dark, .dark *) { background-image: linear-gradient(90deg, transparent 0, rgb(255 255 255 / 0.06) 50%, transparent 100%); }
+}
+
+@utility nav-link {
+  @apply rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400;
+  &[aria-current="page"] { @apply text-indigo-600 dark:text-indigo-400; }
+}
+
+@utility spinner { @apply inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent; }
+
+/* Dark mode: lift muted gray text so it keeps WCAG AA contrast on dark surfaces.
+   (Unlayered, so it wins over the utility layer.) */
+.dark .text-gray-500 { color: var(--color-gray-400); }

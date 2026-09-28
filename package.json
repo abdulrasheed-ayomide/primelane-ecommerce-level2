@@ -1,0 +1,16 @@
+{
+  "name": "primelane-ecommerce",
+  "version": "2.0.0",
+  "description": "PrimeLane: a responsive e-commerce store built with vanilla JavaScript, Tailwind CSS and Firebase.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tailwindcss -i ./src/styles.css -o ./css/styles.css --watch",
+    "build": "tailwindcss -i ./src/styles.css -o ./css/styles.css --minify",
+    "serve": "npx --yes serve . -l 5501"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}
